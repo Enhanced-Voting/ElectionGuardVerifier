@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading;
 
 namespace ElectionGuardVerifier
 {
@@ -8,15 +13,63 @@ namespace ElectionGuardVerifier
      /// </summary>
     public class Calculator
     {
+
+        // Random generator (thread safe)
+        private static ThreadLocal<Random> s_Gen = new ThreadLocal<Random>(() => new Random());
+        private static Random Gen { get => s_Gen.Value; }
+
+        public static BigInteger LargePrime_p { get; private set; }
+        public static BigInteger SmallPrime_q { get; private set; }
+
+        public Calculator(BigInteger p, BigInteger q)
+        {
+            LargePrime_p = p;
+
+            SmallPrime_q = q;
+        }
+
         /// <summary>
         /// Hashes are computed using the SHA-256 hash function in NIST (2015) Secure Hash Standard (SHS) which is published in FIPS 180-4 and can be found in https://csrc.nist.gov/publications/detail/fips/180/4/final.
         /// For the purposes of SHA-256 hash computations, all inputs – whether textural or numeric – are represented as utf-8 encoded strings.Numbers are represented as strings in base ten.The hash function expects a single-dimensional array of input elements that are hashed iteratively, rather than concatenated together. Each element in the hash is separated by the pipe character (“|”). When dealing with multi-dimensional arrays, the elements are hashed recursively in the order in which they are input into the hash function.For instance, calling 𝐻(1,2, [3,4,5],6) is a function call with 4 parameters, where the 3rd parameter is itself an array.The hash function will process arguments 1 and 2, when it gets to argument 3 it will traverse the array(and hash the values 3, 4 ,5) before hashing the final fourth argument(whose value is 6). When hashing an array element that is empty, the array is instead replaced with the word “null” as a placeholder.
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        public BigInteger Hash(string[] s)
+        public BigInteger Hash(params string[] s)
         {
-            return new BigInteger();
+            
+            var pipeBytes = Encoding.UTF8.GetBytes("|");
+            using (var sha = SHA256.Create())
+            {
+                // why are we hashing the pipes?
+                // We are missing the split string by pipes
+                sha.TransformBlock(pipeBytes, 0, pipeBytes.Length, null, 0);
+                for (var i = 0; i < s.Length; i++)
+                {
+                    var ele = s[i];
+
+                    string toHash;
+                    if (ele == null)
+                        toHash = "null";
+                    else if (ele is string)
+                        toHash = ele.ToString();
+                    else if (ele is IEnumerable)
+                        toHash = Hash(ele).ToString();
+                    else
+                        toHash = ele.ToString();
+
+                    var arr = Encoding.UTF8.GetBytes(toHash + "|");
+                    sha.TransformBlock(arr, 0, arr.Length, null, 0);
+
+                    if (i == s.Length - 1)
+                        sha.TransformFinalBlock(arr, 0, 0);
+                }
+
+                var bytes = sha.Hash.Reverse()   // BigInteger cotr expects input to be little endian, so we must reverse it
+                    .Concat(new byte[] { 0 })    // Must apppend 00 byte to end of array to signal unsigned
+                    .ToArray();
+                                
+                return new BigInteger(bytes) % BigInteger.Add(SmallPrime_q, BigInteger.MinusOne);
+            }
         }
 
         /// <summary>
@@ -28,7 +81,7 @@ namespace ElectionGuardVerifier
         /// <returns></returns>
         public BigInteger Sum(BigInteger a, BigInteger b, BigInteger n)
         {
-            return new BigInteger();
+            return BigInteger.Add(a, b) % n;
         }
 
         /// <summary>
@@ -40,7 +93,7 @@ namespace ElectionGuardVerifier
         /// <returns></returns>
         public BigInteger Multiply(BigInteger a, BigInteger b, BigInteger n)
         {
-            return new BigInteger();
+            return BigInteger.Multiply(a, b) % n;
         }
 
         /// <summary>
@@ -52,7 +105,7 @@ namespace ElectionGuardVerifier
         /// <returns></returns>
         public BigInteger Exponentiate(BigInteger a, BigInteger b, BigInteger n)
         {
-            return new BigInteger();
+            return BigInteger.ModPow(a, b, n);
         }
     }
 }
