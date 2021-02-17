@@ -39,16 +39,15 @@ namespace ElectionGuardVerifier
             
             var pipeBytes = Encoding.UTF8.GetBytes("|");
             using (var sha = SHA256.Create())
-            {
-                // why are we hashing the pipes?
-                // We are missing the split string by pipes
+            {   
+                // Why are we putting in pipes first?
                 sha.TransformBlock(pipeBytes, 0, pipeBytes.Length, null, 0);
                 for (var i = 0; i < s.Length; i++)
                 {
                     var ele = s[i];
 
                     string toHash;
-                    if (ele == null)
+                    if (String.IsNullOrEmpty(ele))
                         toHash = "null";
                     else if (ele is string)
                         toHash = ele.ToString();
