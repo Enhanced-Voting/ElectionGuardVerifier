@@ -34,7 +34,7 @@ namespace ElectionGuardVerifier
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        public BigInteger Hash(params string[] s)
+        public BigInteger Hash<T>(params T[] s)
         {
             
             var pipeBytes = Encoding.UTF8.GetBytes("|");
@@ -47,7 +47,7 @@ namespace ElectionGuardVerifier
                     var ele = s[i];
 
                     string toHash;
-                    if (String.IsNullOrEmpty(ele))
+                    if (ele==null)
                         toHash = "null";
                     else if (ele is string)
                         toHash = ele.ToString();

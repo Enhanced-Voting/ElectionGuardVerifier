@@ -7,6 +7,13 @@ namespace ElectionGuardVerifier.ElectionRecord
 {
     public class Guardian
     {
+        public string Id { get; set; }
+        public List<GuardianProof> GuardianProofs { get; set; }
+    }
+
+    public class GuardianProof
+    {
+        public string Id { get; set; }
         public BigInteger PublicKey_K { get; set; }
 
         public BigInteger Commitment_h { get; set; }

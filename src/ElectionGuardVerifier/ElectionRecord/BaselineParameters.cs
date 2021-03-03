@@ -12,24 +12,24 @@ namespace ElectionGuardVerifier.ElectionRecord
         public BaselineParameters(BigInteger largePrime_p, BigInteger smallPrime_q, BigInteger coFactor_r, BigInteger generator_g)
         {
             if (!largePrime_p.Equals(ExpectedLargePrime))
-                throw new Exception("Large prime does not match expected large prime.");
+                throw new Exception("Invalid baseline parameters: Large prime does not match expected large prime.");
             
             if(!smallPrime_q.Equals(ExpectedSmallPrime))
-                throw new Exception("Small prime does not match expected small prime.");
+                throw new Exception("Invalid baseline parameters: Small prime does not match expected small prime.");
 
             if (!BigInteger.Equals(largePrime_p + BigInteger.MinusOne, BigInteger.Multiply(smallPrime_q, coFactor_r)))
-                throw new Exception("p - 1 does not equal r * q");
+                throw new Exception("Invalid baseline parameters: p - 1 does not equal r * q");
 
             // todo: validate the need for this
             if (smallPrime_q % coFactor_r == 0)
-                throw new Exception("Small prime, q, is divisible by cofactor, r. ");
+                throw new Exception("Invalid baseline parameters: Small prime, q, is divisible by cofactor, r. ");
 
             if (!BigInteger.Equals(generator_g, BigInteger.ModPow(2, coFactor_r, LargePrime_p)))
-                throw new Exception("Generator, g, is not equal to 2^r mod p");
+                throw new Exception("Invalid baseline parameters: Generator, g, is not equal to 2^r mod p");
 
             // todo: validate the need for this
             if (BigInteger.ModPow(generator_g, smallPrime_q, LargePrime_p) != 1)
-                throw new Exception("Generator, g^q mod p is not equal to 1.");
+                throw new Exception("Invalid baseline parameters: Generator, g^q mod p is not equal to 1.");
 
             // checks pass, let's set the properties
             LargePrime_p = largePrime_p;
