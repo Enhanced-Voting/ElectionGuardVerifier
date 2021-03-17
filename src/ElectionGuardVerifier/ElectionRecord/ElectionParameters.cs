@@ -18,5 +18,7 @@ namespace ElectionGuardVerifier.ElectionRecord
         public BigInteger BaseHashValue_Q { get; set; }
 
         public BigInteger ExtendedHashValue_Qp { get; set; }
+
+        public BigInteger PublicKey_K { get; set; }
     }
 }

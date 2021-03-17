@@ -13,8 +13,11 @@ namespace ElectionGuardVerifier.Verifiers
     /// </summary>
     public class GuardianPublicKeyVerifier : Verifier
     {
-        private List<VerificationStep> verificationSteps;
-        private Guardian Guardian;
+        private readonly List<VerificationStep> verificationSteps;
+
+        private readonly Guardian Guardian;
+        protected override string Description { get => "Guardian Public-Key Validation"; }
+        protected override List<VerificationStep> VerificationSteps { get => verificationSteps; }
         public GuardianPublicKeyVerifier(BaselineParameters baselineParameters, ElectionParameters electionParameters, Guardian guardian) : base(baselineParameters, electionParameters)
         {
             verificationSteps = new List<VerificationStep>() {
@@ -27,17 +30,16 @@ namespace ElectionGuardVerifier.Verifiers
             },
             new VerificationStep()
             {
-                Description = "Verify Guardian's Public Key Equation",
+                Description = "Verify Guardian's Schnorr Proof",
                 StepOrder = 2,
-                ErrorMessage = "Equation of generator ^ response mod p = (commitment * public key ^ challenge) mod p did not equal.",
+                ErrorMessage = "Schnorr proof failed. Equation of generator ^ response mod p = (commitment * public key ^ challenge) mod p did not equal.",
                 SuccessMessage = "Equation of generator ^ response mod p = (commitment * public key ^ challenge) mod p is satisfied.",
-                VerificationStepMethod = VerifyGeneratorEquation
+                VerificationStepMethod = VerifySchnorrProof
             }
             };
             Guardian = guardian;
         }
-        protected override string Description { get => "Guardian Public-Key Validation"; }
-        protected override List<VerificationStep> VerificationSteps { get => verificationSteps; }
+       
         
         private List<VerificationResultMessage> VerifyCoefficientProof()
         {
@@ -55,7 +57,7 @@ namespace ElectionGuardVerifier.Verifiers
             return resultMessages;
         }
 
-        private List<VerificationResultMessage> VerifyGeneratorEquation()
+        private List<VerificationResultMessage> VerifySchnorrProof()
         {
             List<VerificationResultMessage> resultMessages = new List<VerificationResultMessage>();
 
