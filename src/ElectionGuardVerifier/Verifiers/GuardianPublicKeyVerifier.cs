@@ -64,9 +64,15 @@ namespace ElectionGuardVerifier.Verifiers
             foreach (var proof in Guardian.GuardianProofs)
             {
                 var generatorFunctionResult = BigInteger.ModPow(BaselineParameters.Generator_g, proof.Response_u, BaselineParameters.LargePrime_p);
-                var commitmentFunctionResult = BigInteger.Multiply(proof.Commitment_h, BigInteger.ModPow(proof.PublicKey_K, proof.Challenge_c, BaselineParameters.LargePrime_p)) % BaselineParameters.LargePrime_p;
+                var commitmentFunctionResult = BigInteger.Multiply(
+                    proof.Commitment_h, 
+                    BigInteger.ModPow(proof.PublicKey_K, proof.Challenge_c, BaselineParameters.LargePrime_p)
+                    ) 
+                    % BaselineParameters.LargePrime_p;
 
-                resultMessages.Add(new VerificationResultMessage() { IsSuccessful = generatorFunctionResult.Equals(commitmentFunctionResult), Reference = "Guardian: " + Guardian.Id + ", Proof: " + proof.Id });
+                resultMessages.Add(new VerificationResultMessage() { 
+                    IsSuccessful = generatorFunctionResult.Equals(commitmentFunctionResult), 
+                    Reference = "Guardian: " + Guardian.Id + ", Proof: " + proof.Id });
 
             }
 

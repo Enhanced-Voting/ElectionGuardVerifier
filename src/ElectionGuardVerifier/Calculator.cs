@@ -106,5 +106,20 @@ namespace ElectionGuardVerifier
         {
             return BigInteger.ModPow(a, b, n);
         }
+
+        public bool IsWithinZp(BigInteger num)
+        {
+            return IsWithinSet(num, 0, LargePrime_p);
+        }
+
+        public bool IsWithinZq(BigInteger num)
+        {
+            return IsWithinSet(num, 0, SmallPrime_q);
+        }
+
+        private bool IsWithinSet(BigInteger num, BigInteger lower, BigInteger upper)
+        {
+            return BigInteger.Compare(num, lower) > 0 && BigInteger.Compare(num, upper) < 0;
+        }
     }
 }

@@ -41,5 +41,33 @@ namespace ElectionGuardVerifier.Verifiers
             return results;
         }
 
+        /// <summary>
+        /// Calculate to see if the two Chaum-Pedersen functions are satisfied with the given inputs
+        /// </summary>
+        /// <param name="encryption"></param>
+        /// <param name="commitment"></param>
+        /// <param name="challenge"></param>
+        /// <param name="response"></param>
+        /// <returns></returns>
+        protected bool CheckChaumPedersenEquations(CipherPair encryption, CipherPair commitment, BigInteger challenge, BigInteger response) {
+
+            
+            BigInteger left_1 = Calculator.Exponentiate(BaselineParameters.Generator_g, response, BaselineParameters.LargePrime_p);
+            BigInteger right_1 = Calculator.Multiply(
+                commitment.Alpha,
+                Calculator.Exponentiate(encryption.Alpha, challenge, BaselineParameters.LargePrime_p),
+                BaselineParameters.LargePrime_p
+                );
+
+            BigInteger left_2 = Calculator.Exponentiate(ElectionParameters.PublicKey_K, response, BaselineParameters.LargePrime_p);
+            BigInteger right_2 = Calculator.Multiply(
+                commitment.Beta,
+                Calculator.Exponentiate(encryption.Beta, challenge, BaselineParameters.LargePrime_p),
+                BaselineParameters.LargePrime_p
+                );
+
+            return left_1.Equals(right_1) && left_2.Equals(right_2);
+        
+        }
     }
 }
